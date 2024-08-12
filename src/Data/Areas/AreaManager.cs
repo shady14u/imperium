@@ -72,12 +72,12 @@
 
       public Area GetByClaimCupboard(BuildingPrivlidge cupboard)
       {
-        return GetByClaimCupboard(cupboard.net.ID);
+        return GetByClaimCupboard(cupboard.net.ID.Value);
       }
 
-      public Area GetByClaimCupboard(uint cupboardId)
+      public Area GetByClaimCupboard(ulong cupboardId)
       {
-        return Areas.Values.FirstOrDefault(a => a.ClaimCupboard != null && a.ClaimCupboard.net.ID == cupboardId);
+        return Areas.Values.FirstOrDefault(a => a.ClaimCupboard != null && a.ClaimCupboard.net.ID.Value == cupboardId);
       }
 
       public Area GetByEntityPosition(BaseEntity entity)

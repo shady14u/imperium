@@ -58,7 +58,7 @@
       if (Options.Map.PinCost > 0)
       {
         ItemDefinition scrapDef = ItemManager.FindItemDefinition("scrap");
-        List<Item> stacks = user.Player.inventory.FindItemIDs(scrapDef.itemid);
+        List<Item> stacks = user.Player.inventory.FindItemsByItemID(scrapDef.itemid);
 
         if (!Instance.TryCollectFromStacks(scrapDef, stacks, Options.Map.PinCost))
         {

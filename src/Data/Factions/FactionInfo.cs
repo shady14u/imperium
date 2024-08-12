@@ -26,7 +26,7 @@
       public float TaxRate;
 
       [JsonProperty("taxChestId")]
-      public uint? TaxChestId;
+      public ulong? TaxChestId;
 
       [JsonProperty("nextUpkeepPaymentTime")]
       public DateTime NextUpkeepPaymentTime;

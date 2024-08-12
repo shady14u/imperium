@@ -82,7 +82,7 @@
 
         if (info.CupboardId != null)
         {
-          cupboard = BaseNetworkable.serverEntities.Find((uint)info.CupboardId) as BuildingPrivlidge;
+          cupboard = BaseNetworkable.serverEntities.Find(new NetworkableId(info.CupboardId.Value)) as BuildingPrivlidge;
           if (cupboard == null)
           {
             Instance.Log($"[LOAD] Area {Id}: Cupboard entity {info.CupboardId} not found, treating as unclaimed");
@@ -192,7 +192,7 @@
           Type = Type,
           FactionId = FactionId,
           ClaimantId = ClaimantId,
-          CupboardId = ClaimCupboard?.net?.ID
+          CupboardId = ClaimCupboard?.net?.ID.Value
         };
       }
     }

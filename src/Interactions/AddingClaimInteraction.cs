@@ -41,7 +41,7 @@
           if (cost > 0)
           {
             ItemDefinition scrapDef = ItemManager.FindItemDefinition("scrap");
-            List<Item> stacks = User.Player.inventory.FindItemIDs(scrapDef.itemid);
+            List<Item> stacks = User.Player.inventory.FindItemsByItemID(scrapDef.itemid);
 
             if (!Instance.TryCollectFromStacks(scrapDef, stacks, cost))
             {

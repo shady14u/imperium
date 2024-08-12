@@ -73,12 +73,12 @@
 
       public Faction GetByTaxChest(StorageContainer container)
       {
-        return GetByTaxChest(container.net.ID);
+        return GetByTaxChest(container.net.ID.Value);
       }
 
-      public Faction GetByTaxChest(uint containerId)
+      public Faction GetByTaxChest(ulong containerId)
       {
-        return Factions.Values.SingleOrDefault(f => f.TaxChest != null && f.TaxChest.net.ID == containerId);
+        return Factions.Values.SingleOrDefault(f => f.TaxChest != null && f.TaxChest.net.ID.Value == containerId);
       }
 
       public void SetTaxRate(Faction faction, float taxRate)

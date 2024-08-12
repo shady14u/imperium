@@ -32,7 +32,7 @@ namespace Oxide.Plugins
   using System.Collections.Generic;
   using System.Linq;
 
-  [Info("Imperium", "chucklenugget", "1.10.0")]
+  [Info("Imperium", "chucklenugget", "1.10.1")]
   public partial class Imperium : RustPlugin
   {
     static Imperium Instance;
@@ -1757,7 +1757,7 @@ namespace Oxide.Plugins
       if (Options.Map.PinCost > 0)
       {
         ItemDefinition scrapDef = ItemManager.FindItemDefinition("scrap");
-        List<Item> stacks = user.Player.inventory.FindItemIDs(scrapDef.itemid);
+        List<Item> stacks = user.Player.inventory.FindItemsByItemID(scrapDef.itemid);
 
         if (!Instance.TryCollectFromStacks(scrapDef, stacks, Options.Map.PinCost))
         {
@@ -2938,7 +2938,7 @@ namespace Oxide.Plugins
       public const string ClaimsList = "<color=#ffd479>[{0}]</color> has claimed: <color=#ffd479>{1}</color>";
       public const string ClaimCost = "<color=#ffd479>{0}</color> can be claimed by <color=#ffd479>[{1}]</color> for <color=#ffd479>{2}</color> scrap.";
       public const string UpkeepCost = "It will cost <color=#ffd479>{0}</color> scrap per day to maintain the <color=#ffd479>{1}</color> areas claimed by <color=#ffd479>[{2}]</color>. Upkeep is due <color=#ffd479>{3}</color> hours from now.";
-      public const string UpkeepCostOverdue = "It will cost <color=#ffd479>{0}</color> scrap per day to maintain the <color=#ffd479>{1}</color> areas claimed by <color=#ffd479>[{2}]</color>. Your upkeep is <color=#ffd479>{3}</color> hours overdue! Fill your tax chest with scrap immediately, before your claims begin to fall into ruin.";
+      public const string UpkeepCostOverdue = "It will cost <color=#ffd479>{0}</color> scrap per day to maintain the <color=#ffd479>{1}</color> areas claimed by <color=#ffd479>[{2}]</color>. Your upkeep is <color=#ffd479>{3}</color> hours overdue! Fill your headquarters TC with scrap immediately, before your claims begin to fall into ruin.";
 
       public const string SelectTaxChest = "Use the hammer to select the container to receive your faction's tribute. Say <color=#ffd479>/cancel</color> to cancel.";
       public const string SelectingTaxChestFailedInvalidTarget = "That can't be used as a tax chest.";
@@ -3653,7 +3653,7 @@ namespace Oxide.Plugins
 
       void Awake()
       {
-        InvokeRepeating("CheckClaimCupboard", 60f, 60f);
+        InvokeRepeating(nameof(CheckClaimCupboard), 60f, 60f);
       }
 
       void OnDestroy()
@@ -3663,8 +3663,8 @@ namespace Oxide.Plugins
         if (collider != null)
           Destroy(collider);
 
-        if (IsInvoking("CheckClaimCupboard"))
-          CancelInvoke("CheckClaimCupboard");
+        if (IsInvoking(nameof(CheckClaimCupboard)))
+          CancelInvoke(nameof(CheckClaimCupboard));
       }
 
       void TryLoadInfo(AreaInfo info)
@@ -3673,7 +3673,7 @@ namespace Oxide.Plugins
 
         if (info.CupboardId != null)
         {
-          cupboard = BaseNetworkable.serverEntities.Find((uint)info.CupboardId) as BuildingPrivlidge;
+          cupboard = BaseNetworkable.serverEntities.Find(new NetworkableId(info.CupboardId.Value)) as BuildingPrivlidge;
           if (cupboard == null)
           {
             Instance.Log($"[LOAD] Area {Id}: Cupboard entity {info.CupboardId} not found, treating as unclaimed");
@@ -3783,7 +3783,7 @@ namespace Oxide.Plugins
           Type = Type,
           FactionId = FactionId,
           ClaimantId = ClaimantId,
-          CupboardId = ClaimCupboard?.net?.ID
+          CupboardId = ClaimCupboard?.net?.ID.Value
         };
       }
     }
@@ -3814,7 +3814,7 @@ namespace Oxide.Plugins
       public string ClaimantId;
 
       [JsonProperty("cupboardId")]
-      public uint? CupboardId;
+      public ulong? CupboardId;
     }
   }
 }
@@ -3892,12 +3892,12 @@ namespace Oxide.Plugins
 
       public Area GetByClaimCupboard(BuildingPrivlidge cupboard)
       {
-        return GetByClaimCupboard(cupboard.net.ID);
+        return GetByClaimCupboard(cupboard.net.ID.Value);
       }
 
-      public Area GetByClaimCupboard(uint cupboardId)
+      public Area GetByClaimCupboard(ulong cupboardId)
       {
-        return Areas.Values.FirstOrDefault(a => a.ClaimCupboard != null && a.ClaimCupboard.net.ID == cupboardId);
+        return Areas.Values.FirstOrDefault(a => a.ClaimCupboard != null && a.ClaimCupboard.net.ID.Value == cupboardId);
       }
 
       public Area GetByEntityPosition(BaseEntity entity)
@@ -4166,7 +4166,7 @@ namespace Oxide.Plugins
 
         if (info.TaxChestId != null)
         {
-          var taxChest = BaseNetworkable.serverEntities.Find((uint)info.TaxChestId) as StorageContainer;
+          var taxChest = BaseNetworkable.serverEntities.Find(new NetworkableId(info.TaxChestId.Value)) as StorageContainer;
 
           if (taxChest == null || taxChest.IsDestroyed)
             Instance.Log($"[LOAD] Faction {Id}: Tax chest entity {info.TaxChestId} was not found");
@@ -4348,7 +4348,7 @@ namespace Oxide.Plugins
           ManagerIds = ManagerIds.ToArray(),
           InviteIds = InviteIds.ToArray(),
           TaxRate = TaxRate,
-          TaxChestId = TaxChest?.net?.ID,
+          TaxChestId = TaxChest?.net?.ID.Value,
           NextUpkeepPaymentTime = NextUpkeepPaymentTime
         };
       }
@@ -4365,12 +4365,12 @@ namespace Oxide.Plugins
     {
       void Awake()
       {
-        InvokeRepeating("CheckTaxChests", 60f, 60f);
+        InvokeRepeating(nameof(EnsureAllTaxChestsStillExist), 60f, 60f);
       }
 
       void OnDestroy()
       {
-        if (IsInvoking("CheckTaxChests")) CancelInvoke("CheckTaxChests");
+        if (IsInvoking(nameof(EnsureAllTaxChestsStillExist))) CancelInvoke(nameof(EnsureAllTaxChestsStillExist));
       }
 
       void EnsureAllTaxChestsStillExist()
@@ -4418,7 +4418,7 @@ namespace Oxide.Plugins
       public float TaxRate;
 
       [JsonProperty("taxChestId")]
-      public uint? TaxChestId;
+      public ulong? TaxChestId;
 
       [JsonProperty("nextUpkeepPaymentTime")]
       public DateTime NextUpkeepPaymentTime;
@@ -4503,12 +4503,12 @@ namespace Oxide.Plugins
 
       public Faction GetByTaxChest(StorageContainer container)
       {
-        return GetByTaxChest(container.net.ID);
+        return GetByTaxChest(container.net.ID.Value);
       }
 
-      public Faction GetByTaxChest(uint containerId)
+      public Faction GetByTaxChest(ulong containerId)
       {
-        return Factions.Values.SingleOrDefault(f => f.TaxChest != null && f.TaxChest.net.ID == containerId);
+        return Factions.Values.SingleOrDefault(f => f.TaxChest != null && f.TaxChest.net.ID.Value == containerId);
       }
 
       public void SetTaxRate(Faction faction, float taxRate)
@@ -4963,7 +4963,7 @@ namespace Oxide.Plugins
 
       public void Init()
       {
-        List<BasePlayer> players = BasePlayer.activePlayerList;
+        List<BasePlayer> players = BasePlayer.activePlayerList.ToList();
 
         Instance.Puts($"Creating user objects for {players.Count} players...");
 
@@ -5355,7 +5355,7 @@ namespace Oxide.Plugins
         collider.enabled = true;
 
         if (endTime != null)
-          InvokeRepeating("CheckIfShouldDestroy", 10f, 5f);
+          InvokeRepeating(nameof(CheckIfShouldDestroy), 10f, 5f);
       }
 
       void OnDestroy()
@@ -5368,8 +5368,8 @@ namespace Oxide.Plugins
         foreach (BaseEntity sphere in Spheres)
           sphere.KillMessage();
 
-        if (IsInvoking("CheckIfShouldDestroy"))
-          CancelInvoke("CheckIfShouldDestroy");
+        if (IsInvoking(nameof(CheckIfShouldDestroy)))
+          CancelInvoke(nameof(CheckIfShouldDestroy));
       }
 
       void OnTriggerEnter(Collider collider)
@@ -6195,7 +6195,7 @@ namespace Oxide.Plugins
           if (cost > 0)
           {
             ItemDefinition scrapDef = ItemManager.FindItemDefinition("scrap");
-            List<Item> stacks = User.Player.inventory.FindItemIDs(scrapDef.itemid);
+            List<Item> stacks = User.Player.inventory.FindItemsByItemID(scrapDef.itemid);
 
             if (!Instance.TryCollectFromStacks(scrapDef, stacks, cost))
             {
@@ -6963,7 +6963,7 @@ namespace Oxide.Plugins
         foreach (CargoShip ship in FindObjectsOfType<CargoShip>())
           BeginEvent(ship);
 
-        InvokeRepeating("CheckEvents", CheckIntervalSeconds, CheckIntervalSeconds);
+        InvokeRepeating(nameof(CheckEvents), CheckIntervalSeconds, CheckIntervalSeconds);
       }
 
       void OnDestroy()

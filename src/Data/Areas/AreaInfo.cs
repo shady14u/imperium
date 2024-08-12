@@ -23,7 +23,7 @@
       public string ClaimantId;
 
       [JsonProperty("cupboardId")]
-      public uint? CupboardId;
+      public ulong? CupboardId;
     }
   }
 }

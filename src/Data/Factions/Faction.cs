@@ -54,7 +54,7 @@
 
         if (info.TaxChestId != null)
         {
-          var taxChest = BaseNetworkable.serverEntities.Find((uint)info.TaxChestId) as StorageContainer;
+          var taxChest = BaseNetworkable.serverEntities.Find(new NetworkableId(info.TaxChestId.Value)) as StorageContainer;
 
           if (taxChest == null || taxChest.IsDestroyed)
             Instance.Log($"[LOAD] Faction {Id}: Tax chest entity {info.TaxChestId} was not found");
@@ -236,7 +236,7 @@
           ManagerIds = ManagerIds.ToArray(),
           InviteIds = InviteIds.ToArray(),
           TaxRate = TaxRate,
-          TaxChestId = TaxChest?.net?.ID,
+          TaxChestId = TaxChest?.net?.ID.Value,
           NextUpkeepPaymentTime = NextUpkeepPaymentTime
         };
       }

@@ -83,7 +83,7 @@
 
       public void Init()
       {
-        List<BasePlayer> players = BasePlayer.activePlayerList;
+        List<BasePlayer> players = BasePlayer.activePlayerList.ToList();
 
         Instance.Puts($"Creating user objects for {players.Count} players...");
 
